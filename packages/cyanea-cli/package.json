@@ -1,0 +1,20 @@
+{
+  "name": "@pbrucla/cyanea-cli",
+  "type": "module",
+  "scripts": {
+    "withTsEsmPnP": "yarn node --loader ts-node/esm --loader ../../.pnp.loader.mjs",
+    "cli:run": "yarn withTsEsmPnP index.ts"
+  },
+  "dependencies": {
+    "@pbrucla/cyanea-core": "workspace:^",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "5.3.1-rc"
+  },
+  "engines": {
+    "node": ">=21.0.0"
+  },
+  "packageManager": "yarn@4.0.2"
+}

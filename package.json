@@ -1,0 +1,29 @@
+{
+  "name": "@pbrucla/cyanea",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "fix": "yarn prettier -w packages/**/*.ts && yarn eslint --fix packages/**/*.ts",
+    "postinstall": "husky install"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^1.5.1",
+    "@types/eslint": "^8",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "husky": "^8.0.0",
+    "prettier": "^3.1.1",
+    "typescript": "5.3.1-rc"
+  },
+  "engines": {
+    "node": ">=21.0.0"
+  },
+  "packageManager": "yarn@4.0.2"
+}

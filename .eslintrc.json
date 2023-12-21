@@ -1,0 +1,43 @@
+{
+  "root": true,
+  "plugins": ["@stylistic", "@typescript-eslint", "import", "unused-imports"],
+  "env": {
+    "node": true,
+    "es2023": true
+  },
+  "overrides": [
+    {
+      "files": ["*.tsx", "*.ts"],
+      "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:import/recommended"],
+      "parserOptions": {
+        "ecmaVersion": 2023,
+        "sourceType": "module"
+      },
+      "settings": {
+        "import/parsers": {
+          "@typescript-eslint/parser": [".ts", ".tsx"]
+        },
+        "import/resolver": {
+          "typescript": {
+            "alwaysTryTypes": true,
+            "project": ["tsconfig.json"]
+          },
+          "node": true
+        }
+      },
+      "rules": {
+        "@stylistic/spaced-comment": [
+          "error",
+          "always",
+          { "block": { "balanced": true } }
+        ],
+        "import/no-amd": "error",
+        "import/no-commonjs": "error",
+        "import/no-unresolved": "error",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "unused-imports/no-unused-imports": "error"
+      }
+    }
+  ]
+}

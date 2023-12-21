@@ -1,0 +1,12 @@
+{
+  "name": "@pbrucla/cyanea-core",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "5.3.1-rc"
+  },
+  "engines": {
+    "node": ">=21.0.0"
+  },
+  "packageManager": "yarn@4.0.2"
+}

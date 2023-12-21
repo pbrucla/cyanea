@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "lib": ["es2023"],
+        "target": "es2022",
+        "module": "node16",
+        "moduleResolution": "node16",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "incremental": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
+    },
+    "ts-node": {
+      "esm": true,
+      "files": true,
+      "logError": true,
+      "pretty": true,
+      "transpileOnly": false
+    },
+    "include": ["packages/**/*.ts"]
+}
