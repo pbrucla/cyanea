@@ -1,7 +1,12 @@
 {
   "name": "@pbrucla/cyanea-core",
   "type": "module",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "lodash": "^4.17.21"
+  },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20.10.5",
     "typescript": "5.3.1-rc"
   },
