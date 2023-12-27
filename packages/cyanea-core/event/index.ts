@@ -16,7 +16,7 @@ export default interface CyaneaEvent {
   start: number
   end: number
   links?: Record<string, string>
-  meta?: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  meta?: Record<string, any>
 }
 
 // TODO microsoft/Typescript#32063 microsoft/Typescript#54488

@@ -1,3 +1,4 @@
+import { JSONSchemaType } from "ajv"
 import { Stream } from "node:stream"
 
 import CyaneaEvent from "./event/index.ts"
@@ -46,22 +47,39 @@ export interface CyaneaSource {
   readEvents(): Promise<CyaneaEvent[]>
 }
 
-type CyaneaPluginDecl<Type extends "sink" | "source", IsFilestore extends boolean> = {
-  type: Type
-  load(): Promise<
-    (Type extends "sink" ? CyaneaSink : CyaneaSource) & (IsFilestore extends true ? CyaneaFilestore : unknown)
-  >
-} & (IsFilestore extends true ? { isFilestore: true } : { isFilestore?: false })
+interface CyaneaPluginComponent<Config, Out> {
+  configSchema: JSONSchemaType<Config>
+  load(config: Config): Promise<Out>
+}
 
 /**
  * Base interface for all Cyanea plugins.
  *
- * Each plugin should expose exactly one source
- * or one sink. The source/sink can also be a
- * filestore.
+ * Each plugin can export up to one source,
+ * one sink, and one filestore.
  */
-export type CyaneaPlugin =
-  | CyaneaPluginDecl<"sink", false>
-  | CyaneaPluginDecl<"source", false>
-  | CyaneaPluginDecl<"sink", true>
-  | CyaneaPluginDecl<"source", true>
+export type CyaneaPlugin<
+  FilestoreConfig = undefined,
+  SourceConfig = undefined,
+  SinkConfig = undefined,
+> = (FilestoreConfig extends undefined
+  ? {
+      filestore?: undefined
+    }
+  : {
+      filestore: CyaneaPluginComponent<FilestoreConfig, CyaneaFilestore>
+    }) &
+  (SourceConfig extends undefined
+    ? {
+        source?: undefined
+      }
+    : {
+        source: CyaneaPluginComponent<SourceConfig, CyaneaSource>
+      }) &
+  (SinkConfig extends undefined
+    ? {
+        sink?: undefined
+      }
+    : {
+        sink: CyaneaPluginComponent<SinkConfig, CyaneaSink>
+      })

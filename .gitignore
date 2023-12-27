@@ -14,6 +14,7 @@ node_modules
 *.tsbuildinfo
 
 # debug
+run/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

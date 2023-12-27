@@ -31,11 +31,12 @@
           "always",
           { "block": { "balanced": true } }
         ],
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/no-explicit-any": "off",
         "import/no-amd": "error",
         "import/no-commonjs": "error",
         "import/no-unresolved": "error",
         "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": "warn",
         "unused-imports/no-unused-imports": "error"
       }
     }
