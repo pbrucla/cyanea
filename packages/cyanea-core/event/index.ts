@@ -1,4 +1,4 @@
-import { JSONSchemaType } from "ajv"
+import Ajv, { JSONSchemaType } from "ajv"
 import _ from "lodash"
 
 import schema from "./schema.json" with { type: "json" }
@@ -21,6 +21,11 @@ export default interface CyaneaEvent {
 
 // TODO microsoft/Typescript#32063 microsoft/Typescript#54488
 export const EVENT_SCHEMA = schema as JSONSchemaType<CyaneaEvent>
+
+const EVENT_VALIDATOR = new Ajv.default().compile(EVENT_SCHEMA)
+export function validateEvent(event: unknown): event is CyaneaEvent {
+  return EVENT_VALIDATOR(event)
+}
 
 /**
  * Diffs set b of CyaneaEvents against set a.

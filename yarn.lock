@@ -149,6 +149,7 @@ __metadata:
     chalk: "npm:^5.3.0"
     commander: "npm:^11.1.0"
     ts-node: "npm:^10.9.2"
+    tslib: "npm:^2.6.2"
     typescript: "npm:5.3.1-rc"
   languageName: unknown
   linkType: soft
@@ -161,6 +162,7 @@ __metadata:
     "@types/node": "npm:^20.10.5"
     ajv: "npm:^8.12.0"
     lodash: "npm:^4.17.21"
+    tslib: "npm:^2.6.2"
     typescript: "npm:5.3.1-rc"
   languageName: unknown
   linkType: soft
@@ -171,7 +173,7 @@ __metadata:
   dependencies:
     "@pbrucla/cyanea-core": "workspace:^"
     "@types/node": "npm:^20.10.5"
-    ajv: "npm:^8.12.0"
+    tslib: "npm:^2.6.2"
     typescript: "npm:5.3.1-rc"
   languageName: unknown
   linkType: soft
@@ -182,7 +184,7 @@ __metadata:
   dependencies:
     "@pbrucla/cyanea-core": "workspace:^"
     "@types/node": "npm:^20.10.5"
-    ajv: "npm:^8.12.0"
+    tslib: "npm:^2.6.2"
     typescript: "npm:5.3.1-rc"
   languageName: unknown
   linkType: soft
@@ -2185,6 +2187,7 @@ __metadata:
   dependencies:
     "@pbrucla/cyanea-fs": "workspace:^"
     "@pbrucla/cyanea-git": "workspace:^"
+    tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
 
@@ -2439,6 +2442,13 @@ __metadata:
     minimist: "npm:^1.2.6"
     strip-bom: "npm:^3.0.0"
   checksum: 5b4f301a2b7a3766a986baf8fc0e177eb80bdba6e396792ff92dc23b5bca8bb279fc96517dcaaef63a3b49bebc6c4c833653ec58155780bc906bdbcf7dda0ef5
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.6.2":
+  version: 2.6.2
+  resolution: "tslib@npm:2.6.2"
+  checksum: e03a8a4271152c8b26604ed45535954c0a45296e32445b4b87f8a5abdb2421f40b59b4ca437c4346af0f28179780d604094eb64546bee2019d903d01c6c19bdb
   languageName: node
   linkType: hard
 
