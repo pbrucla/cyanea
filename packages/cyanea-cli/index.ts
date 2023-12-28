@@ -168,6 +168,7 @@ console.log(chalk.blueBright("Reading source of truth..."))
 let events: CyaneaEvent[]
 try {
   events = await modules.source.readEvents()
+  console.log(`Loaded ${events.length} event${events.length !== 1 ? "s" : ""}!`)
 } catch (e) {
   die(`failed to read from source: ${e}`)
 }
@@ -176,7 +177,8 @@ try {
 // Push events
 // ===========
 
-console.log(chalk.blueBright(`Syncing ${Object.keys(modules.sinks).length} sinks...`))
+const numSinks = Object.keys(modules.sinks).length
+console.log(chalk.blueBright(`Syncing ${numSinks} sink${numSinks !== 1 ? "s" : ""}...`))
 try {
   const results = await Promise.allSettled(
     Object.entries(modules.sinks).map(([name, module]) =>

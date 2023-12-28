@@ -5,6 +5,10 @@
   "title": "Cyanea Event",
   "description": "The unified event format for ACM Cyber's Cyanea script.",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "nullable": true
+    },
     "id": {
       "type": "string",
       "description": "A unique identifier for this event."
@@ -15,11 +19,19 @@
     },
     "type": {
       "oneOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" } }
+        {
+          "type": "null"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
       ],
-      "description": "One or more \"tags\" associated with this event.",
-      "nullable": true
+      "description": "One or more \"tags\" associated with this event."
     },
     "description": {
       "type": "string",
