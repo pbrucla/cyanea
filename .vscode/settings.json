@@ -4,7 +4,15 @@
     "**/.pnp.*": true
   },
   "eslint.nodePath": ".yarn/sdks",
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/**/*.events.json"
+      ],
+      "url": "./packages/cyanea-core/event/events.schema.json"
+    },
+  ],
   "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
 }

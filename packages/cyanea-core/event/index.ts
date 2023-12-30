@@ -1,7 +1,7 @@
 import Ajv, { DefinedError, JSONSchemaType } from "ajv"
 import _ from "lodash"
 
-import schema from "./schema.json" with { type: "json" }
+import schema from "./event.schema.json" with { type: "json" }
 
 /**
  * The unified event format for ACM Cyber's Cyanea script.

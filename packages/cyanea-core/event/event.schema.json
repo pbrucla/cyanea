@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/pbrucla/cyanea/main/packages/cyanea-core/event/schema.json",
+  "$id": "https://raw.githubusercontent.com/pbrucla/cyanea/main/packages/cyanea-core/event/event.schema.json",
   "type": "object",
   "title": "Cyanea Event",
   "description": "The unified event format for ACM Cyber's Cyanea script.",
