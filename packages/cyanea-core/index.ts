@@ -1,5 +1,4 @@
 import { JSONSchemaType } from "ajv"
-import { Stream } from "node:stream"
 
 import CyaneaEvent from "./event/index.ts"
 
@@ -19,7 +18,7 @@ export interface CyaneaFilestore {
    * @param data File contents to write.
    * @throws If the file path is invalid, or if a file with the given path already exists.
    */
-  writeFile(file: string, data: string | NodeJS.ArrayBufferView | Stream): Promise<void>
+  writeFile(file: string, data: string | NodeJS.ArrayBufferView): Promise<void>
 
   /**
    * Commits all staged files to the target medium.

@@ -7,15 +7,24 @@ interface FsConfig {
   path: string
 }
 
-const fsConfigSchemaBuilder = (description: string) =>
+interface FsFilestoreConfig extends FsConfig {
+  target?: "disk" | "filestore"
+}
+
+const typescriptWontInferSpreadProperly = <T, U>(t: T, u: U): T & U => ({ ...t, ...u })
+
+const fsConfigSchemaBuilder = <T extends Record<string, any>>(description: string, extra?: T) =>
   ({
     type: "object",
-    properties: {
-      path: {
-        type: "string",
-        description: description,
+    properties: typescriptWontInferSpreadProperly(
+      {
+        path: {
+          type: "string",
+          description: description,
+        } as const,
       },
-    },
+      extra,
+    ),
     required: ["path"],
     additionalProperties: false,
   }) as const
@@ -91,15 +100,22 @@ export default {
     },
   },
   sink: {
-    configSchema: fsConfigSchemaBuilder("Path to a JSON file to write Cyanea events to."),
+    configSchema: fsConfigSchemaBuilder("Path to a JSON file to write Cyanea events to.", {
+      target: {
+        type: "string",
+        enum: ["disk", "filestore"],
+        default: "disk",
+        nullable: true,
+      } as const,
+    }),
     async load(config) {
-      const outPath = resolvePathOrThrow(process.cwd(), config.path)
+      const outPath = resolvePathOrThrow(config.target === "disk" ? process.cwd() : "", config.path)
 
       return {
-        async syncEvents(events) {
-          await fs.writeFile(outPath, JSON.stringify(events))
+        async syncEvents(events, filestore) {
+          await (config.target === "disk" ? fs.writeFile : filestore.writeFile)(outPath, JSON.stringify(events))
         },
       }
     },
   },
-} satisfies CyaneaPlugin<FsConfig, FsConfig, FsConfig>
+} satisfies CyaneaPlugin<FsConfig, FsConfig, FsFilestoreConfig>

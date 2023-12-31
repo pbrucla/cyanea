@@ -9,6 +9,9 @@
     "fix": "yarn prettier -w packages/**/*.ts && yarn eslint --fix packages/**/*.ts",
     "postinstall": "husky install"
   },
+  "dependencies": {
+    "node-gyp": "^10.0.1"
+  },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^1.5.1",
     "@types/eslint": "^8",

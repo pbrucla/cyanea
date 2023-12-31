@@ -4,10 +4,12 @@
   "type": "module",
   "dependencies": {
     "@pbrucla/cyanea-core": "workspace:^",
+    "nodegit": "^0.27.0",
     "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
+    "@types/nodegit": "^0.28.7",
     "typescript": "5.3.1-rc"
   },
   "engines": {
