@@ -1,13 +1,64 @@
+/* eslint import/no-named-as-default-member: 0 */
+
 import { CyaneaPlugin } from "@pbrucla/cyanea-core"
 import { resolvePathOrThrow } from "@pbrucla/cyanea-core/util/index.ts"
+import chalk from "chalk"
+import git, { GitAuth, TreeEntry } from "isomorphic-git"
+import http from "isomorphic-git/http/node"
+import openpgp from "openpgp"
 import fs from "node:fs/promises"
-import Git from "nodegit"
+import os from "node:os"
+import path from "node:path"
+
+// TODO document credentials:
+//
+// - CYANEA_GIT_COMMIT_KEY
+// - CYANEA_GIT_COMMIT_PASSPHRASE
+//
+// - CYANEA_GIT_REMOTE_USERNAME
+// - CYANEA_GIT_REMOTE_PASSWORD
+function getEnvCredentials<K extends (string | { key: string; default: string })[]>(
+  prefix: string,
+  ...envKeys: K
+): { [key in K[number] as Lowercase<key extends { key: string } ? key["key"] : key>]: string } | null {
+  const out: Record<string, string> = {}
+  for (const key of envKeys) {
+    if (typeof key === "string") {
+      const value = process.env[`${prefix}_${key}`]
+      if (value === null || value === undefined) {
+        return null
+      } else {
+        out[key.toLowerCase()] = value
+      }
+    } else {
+      out[key.key.toLowerCase()] = process.env[`${prefix}_${key.key}`] ?? key.default
+    }
+  }
+  return out as ReturnType<typeof getEnvCredentials<K>>
+}
+
+function remoteCredentialsCallback(action: string, creds: GitAuth | null): () => GitAuth | void {
+  return () => {
+    if (creds) {
+      return creds
+    } else {
+      console.warn(
+        chalk.yellow(
+          ` warn: Git requested credentials to ${action}, but no credentials were supplied.
+       Please set CYANEA_GIT_REMOTE_[USERNAME, PASSWORD] with a valid username/password, Personal Access Token, or OAuth2 token combination.
+       See https://isomorphic-git.org/docs/en/onAuth#option-1-username-password for more information.`,
+        ),
+      )
+    }
+  }
+}
 
 async function cloneRepo(
   remote: string,
   branch: string | undefined,
   tempFolderPrefix: string,
-): Promise<Git.Repository> {
+  credentials: GitAuth | null,
+): Promise<string> {
   // make sure local file urls don't escape cwd
   if (remote.trim().startsWith("file://")) {
     remote = resolvePathOrThrow(process.cwd(), remote.trim().substring(7))
@@ -15,27 +66,34 @@ async function cloneRepo(
     remote = resolvePathOrThrow(process.cwd(), remote)
   }
 
-  const path = await fs.mkdtemp(`cyanea-git-${tempFolderPrefix}`)
-  return await Git.Clone(remote, path, branch ? { checkoutBranch: branch } : undefined)
+  const tempPath = await fs.mkdtemp(path.join(os.tmpdir(), `cyanea-git-${tempFolderPrefix}`))
+  await git.clone({
+    fs,
+    http,
+    dir: tempPath,
+    url: remote,
+    ref: branch,
+    singleBranch: true,
+    onAuth: remoteCredentialsCallback(`clone repository ${remote}`, credentials),
+  })
+  return tempPath
 }
 
 // Check if the working directory of the given repository is clean.
-async function isRepoClean(repo: Git.Repository): Promise<boolean> {
+async function isRepoClean(repo: string): Promise<boolean> {
   return (
-    (
-      await repo.getStatus({
-        flags: Git.Status.OPT.INCLUDE_UNTRACKED,
-        show: Git.Status.SHOW.INDEX_AND_WORKDIR,
-      })
-    ).length == 0
-  )
+    await git.statusMatrix({
+      fs,
+      dir: repo,
+    })
+  ).every(([_file, head, workdir, stage]) => head === 1 && workdir === 1 && stage === 1) // eslint-disable-line @typescript-eslint/no-unused-vars
 }
 
 interface GitFilestoreConfig {
   clone?: string
   local?: string
   branch?: string
-  push?: boolean
+  push?: boolean | string
 }
 
 export default {
@@ -73,10 +131,20 @@ export default {
               description: "The branch on the Git repository to clone from/push to.",
             },
             push: {
-              type: "boolean",
-              nullable: true,
+              oneOf: [
+                {
+                  type: "null",
+                },
+                {
+                  type: "boolean",
+                },
+                {
+                  type: "string",
+                },
+              ],
               default: true,
-              description: "Whether to push this filestore after committing.",
+              description:
+                "Whether to push this filestore after committing. If a string, this also specifies the remote to push to instead of the default upstream.",
             },
           },
         },
@@ -88,14 +156,17 @@ export default {
         throw "invalid config: exactly one of `config.clone` or `config.local` must be supplied (this should never occur)"
       }
 
-      let repo: Git.Repository
+      const remoteCreds = getEnvCredentials("CYANEA_GIT_REMOTE", "USERNAME", "PASSWORD")
+      const commitCreds = getEnvCredentials("CYANEA_GIT_COMMIT", "KEY", { key: "PASSPHRASE", default: "" } as const)
+
+      const tempRepoFolder: string | null = null
+      let repo: string
       if (config.clone) {
-        repo = await cloneRepo(config.clone, config.branch, "cyanea-git-filestore")
+        repo = await cloneRepo(config.clone, config.branch, "filestore", remoteCreds)
       } else {
-        const repoPath = resolvePathOrThrow(process.cwd(), config.local!)
-        repo = await Git.Repository.open(repoPath)
+        repo = resolvePathOrThrow(process.cwd(), config.local!)
         if (!(await isRepoClean(repo))) {
-          throw `Local filestore repository '${repoPath}' has uncommited changes`
+          throw `Local filestore repository '${repo}' has uncommited changes`
         }
       }
 
@@ -115,22 +186,66 @@ export default {
         async commit() {
           let head
           try {
-            head = await repo.getHeadCommit()
+            head = await git.resolveRef({ fs, dir: repo, ref: "HEAD" })
           } catch {
             // this is the first commit
             head = null
           }
 
-          const tree = await Git.Treebuilder.create(repo, head ? await repo.getTree(head.treeId()) : undefined)
-          for (const [name, content] of files) {
-            const blob = await repo.createBlobFromBuffer(content)
-            await tree.insert(name, blob, Git.TreeEntry.FILEMODE.BLOB)
-          }
-          const treeId = await tree.write()
+          const tree: Map<string, TreeEntry> =
+            head !== null
+              ? new Map((await git.readTree({ fs, dir: repo, oid: head })).tree.map(x => [x.path, x]))
+              : new Map()
 
-          const author = Git.Signature.now("Cyanea Git Bot", "cyanea-git@acmcyber.com")
-          await repo.createCommit("HEAD", author, author, "Sync events", treeId, head ? [head] : [])
-          await repo.checkoutRef(await repo.getReference("HEAD"), { checkoutStrategy: Git.Checkout.STRATEGY.FORCE })
+          for (const [name, content] of files) {
+            const blob = await git.writeBlob({ fs, dir: repo, blob: content })
+            tree.set(name, { mode: "100644", path: name, oid: blob, type: "blob" })
+          }
+          const treeId = await git.writeTree({ fs, dir: repo, tree: [...tree.values()] })
+
+          const author = { name: "Cyanea Git Bot", email: "cyanea-git@acmcyber.com" }
+          await git.commit({
+            fs,
+            dir: repo,
+            message: "Sync events",
+            author,
+            tree: treeId,
+            signingKey: commitCreds?.key,
+            onSign: async ({ payload, secretKey }) => {
+              if (commitCreds === null) {
+                throw "commitCreds are null in onSign callback - this should never happen!"
+              }
+              const encryptedPrivateKey = await openpgp.readPrivateKey({ armoredKey: secretKey })
+              const privateKey =
+                commitCreds.passphrase !== ""
+                  ? await openpgp.decryptKey({ privateKey: encryptedPrivateKey, passphrase: commitCreds.passphrase })
+                  : encryptedPrivateKey
+              const signedMessage = await openpgp.sign({
+                message: await openpgp.createCleartextMessage({ text: payload }),
+                signingKeys: privateKey,
+              })
+              const signature = signedMessage.substring(signedMessage.indexOf("-----BEGIN PGP SIGNATURE-----"))
+              return { signature }
+            },
+          })
+
+          if (config.push === undefined || config.push) {
+            await git.push({
+              fs,
+              http,
+              dir: repo,
+              remote: typeof config.push === "string" ? config.push : undefined,
+              onAuth: remoteCredentialsCallback(`push repository '${repo}'`, remoteCreds),
+            })
+          }
+
+          if (tempRepoFolder !== null) {
+            try {
+              await fs.rm(tempRepoFolder, { recursive: true, force: true })
+            } catch {
+              console.warn(chalk.yellow(` warn: Couldn't clean up temporary filestore clone '${tempRepoFolder}'`))
+            }
+          }
         },
       }
     },
