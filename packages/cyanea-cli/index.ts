@@ -11,8 +11,12 @@ import { createRequire } from "node:module"
 import { CONFIG_V1_SCHEMA } from "./config.ts"
 import path from "node:path"
 
-function die(reason: string): never {
-  console.error(chalk.redBright(`error: ${reason}`))
+function die(reason: string, error?: unknown): never {
+  let stack = ""
+  if (error !== undefined && error !== null && typeof error === "object" && "stack" in error) {
+    stack = `\n${error.stack}`
+  }
+  console.error(chalk.redBright(`error: ${reason}${stack}`))
   process.exit(1)
 }
 
@@ -44,7 +48,7 @@ let configFileContents
 try {
   configFileContents = await fs.readFile(opts.config, "utf-8")
 } catch (e) {
-  die(`failed to read Cyanea config file: ${e}`)
+  die(`failed to read Cyanea config file: ${e}`, e)
 }
 
 const ajv = new Ajv.default()
@@ -64,7 +68,7 @@ try {
   }
   config = configJson
 } catch (e) {
-  die(`failed to parse Cyanea config file: ${e}`)
+  die(`failed to parse Cyanea config file: ${e}`, e)
 }
 
 // ============
@@ -157,7 +161,7 @@ try {
     ),
   }
 } catch (e) {
-  die(`${e}`)
+  die(`${e}`, e)
 }
 
 // ===========
@@ -170,7 +174,7 @@ try {
   events = await modules.source.readEvents()
   console.log(`Loaded ${events.length} event${events.length !== 1 ? "s" : ""}!`)
 } catch (e) {
-  die(`failed to read from source: ${e}`)
+  die(`failed to read from source: ${e}`, e)
 }
 
 // ===========
@@ -192,7 +196,7 @@ try {
     throw `\n${errors.join("\n")}`
   }
 } catch (e) {
-  die(`failed to push events to sinks: ${e}`)
+  die(`failed to push events to sinks: ${e}`, e)
 }
 
 // ====================
@@ -203,7 +207,7 @@ console.log(chalk.blueBright("Comitting changes..."))
 try {
   await modules.filestore.commit()
 } catch (e) {
-  die(`failed to commit changes to the filestore: ${e}`)
+  die(`failed to commit changes to the filestore: ${e}`, e)
 }
 
 console.log(chalk.blueBright("Sucessfully synced all events!"))
