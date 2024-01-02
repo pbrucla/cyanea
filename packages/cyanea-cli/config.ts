@@ -7,15 +7,13 @@ export interface CyaneaConfigV1 {
   sinks: Record<string, Record<string, any>>
 }
 
-const PACKAGE_NAME_REGEX = "^(?:(?:@(?:[a-z0-9-*~][a-z0-9-*._~]*)?/[a-z0-9-._~])|[a-z0-9-~])[a-z0-9-._~]*$" as const
-
 export const CONFIG_V1_SCHEMA: JSONSchemaType<CyaneaConfigV1> = {
   type: "object",
   definitions: {
-    module: {
+    plugins: {
       type: "object",
       patternProperties: {
-        [PACKAGE_NAME_REGEX]: {
+        ["^.*$"]: {
           type: "object",
           required: [],
         },
@@ -28,22 +26,27 @@ export const CONFIG_V1_SCHEMA: JSONSchemaType<CyaneaConfigV1> = {
     version: {
       type: "integer",
       const: 1,
+      description: "Cyanea config format version. This should be exactly 1.",
     },
     filestore: {
-      $ref: "#/definitions/module",
+      $ref: "#/definitions/plugins",
       type: "object",
       maxProperties: 1,
+      title: "Filestore plugin",
     },
     source: {
-      $ref: "#/definitions/module",
+      $ref: "#/definitions/plugins",
       type: "object",
       maxProperties: 1,
+      title: "Source-of-truth plugin",
     },
     sinks: {
-      $ref: "#/definitions/module",
+      $ref: "#/definitions/plugins",
+      title: "Sink plugins",
     },
   },
   required: ["version", "source", "filestore", "sinks"],
+  description: "Cyanea config format.",
 }
 
 export type CyaneaConfig = CyaneaConfigV1

@@ -1,5 +1,3 @@
-/* eslint import/no-named-as-default-member: 0 */
-
 import { CyaneaPlugin } from "@pbrucla/cyanea-core"
 import { resolvePathOrThrow } from "@pbrucla/cyanea-core/util/index.ts"
 import chalk from "chalk"

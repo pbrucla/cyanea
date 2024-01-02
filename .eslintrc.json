@@ -36,6 +36,7 @@
         "import/no-amd": "error",
         "import/no-commonjs": "error",
         "import/no-unresolved": "error",
+        "import/no-named-as-default-member": "off",
         "no-unused-vars": "off",
         "unused-imports/no-unused-imports": "error"
       }

@@ -25,5 +25,5 @@
       "pretty": true,
       "transpileOnly": false
     },
-    "include": ["packages/**/*.ts"]
+    "include": ["build.ts", "packages/**/*.ts"]
 }

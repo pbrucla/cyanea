@@ -1,26 +1,36 @@
 {
   "name": "@pbrucla/cyanea",
   "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*",
     "run/"
   ],
   "scripts": {
-    "fix": "yarn prettier -w packages/**/*.ts && yarn eslint --fix packages/**/*.ts",
+    "build": "yarn node --loader ts-node/esm --loader ./.pnp.loader.mjs build.ts",
+    "fix": "yarn prettier -w build.ts packages/**/*.ts && yarn eslint --fix build.ts packages/**/*.ts",
     "postinstall": "husky install"
+  },
+  "dependencies": {
+    "@pbrucla/cyanea-cli": "workspace:^",
+    "@pbrucla/cyanea-fs": "workspace:^",
+    "@pbrucla/cyanea-git": "workspace:^"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^1.5.1",
-    "@types/eslint": "^8",
     "@types/node": "^20.10.5",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "ajv": "^8.12.0",
+    "chalk": "^5.3.0",
+    "esbuild": "^0.19.11",
     "eslint": "^8.56.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-unused-imports": "^3.0.0",
     "husky": "^8.0.0",
     "prettier": "^3.1.1",
+    "ts-node": "^10.9.2",
     "typescript": "5.3.1-rc"
   },
   "engines": {

@@ -3,19 +3,18 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "withTsEsmPnP": "yarn node --loader ts-node/esm --loader ../../.pnp.loader.mjs",
-    "cli:run": "yarn withTsEsmPnP index.ts"
+    "cli:run": "yarn node --loader ts-node/esm --loader ../../.pnp.loader.mjs index.ts"
   },
   "dependencies": {
     "@pbrucla/cyanea-core": "workspace:^",
     "ajv": "^8.12.0",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
-    "ts-node": "^10.9.2",
     "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
+    "ts-node": "^10.9.2",
     "typescript": "5.3.1-rc"
   },
   "engines": {

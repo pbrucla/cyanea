@@ -13,6 +13,9 @@ node_modules
 # typescript
 *.tsbuildinfo
 
+# build
+dist/
+
 # debug
 run/
 npm-debug.log*

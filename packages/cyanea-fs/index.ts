@@ -106,6 +106,7 @@ export default {
         enum: ["disk", "filestore"],
         default: "disk",
         nullable: true,
+        description: "Whether to write events directly to disk or to the global filestore.",
       } as const,
     }),
     async load(config) {

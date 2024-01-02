@@ -12,6 +12,12 @@
       ],
       "url": "./packages/cyanea-core/event/events.schema.json"
     },
+    {
+      "fileMatch": [
+        "/**/cyanea.json",
+      ],
+      "url": "./dist/schemas/config.json",
+    }
   ],
   "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
