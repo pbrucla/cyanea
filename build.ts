@@ -2,7 +2,9 @@ import { CONFIG_V1_SCHEMA } from "@pbrucla/cyanea-cli/config.ts"
 import { loadPlugin } from "@pbrucla/cyanea-cli/plugin.ts"
 import chalk from "chalk"
 import esbuild from "esbuild"
+import child_process from "node:child_process"
 import fs from "node:fs/promises"
+import util from "node:util"
 
 function generateBanner(packageName: string): { js: string } {
   // fixes https://github.com/evanw/esbuild/issues/1921#issuecomment-1152991694
@@ -80,7 +82,7 @@ for (const p of packages) {
   })
 }
 
-console.log(chalk.blueBright(`Exporting schemas...`))
+console.log(chalk.blueBright("Exporting schemas..."))
 
 await fs.mkdir("dist/schemas", { recursive: true })
 await fs.copyFile("packages/cyanea-core/event/event.schema.json", "dist/schemas/event.json")
@@ -93,5 +95,12 @@ finalConfigSchema.properties!.sinks["properties"] = configs.sink
 
 await fs.writeFile("dist/schemas/config.json", JSON.stringify(finalConfigSchema, undefined, 2))
 
-console.log(chalk.blueBright(`Build succeeded!`))
+console.log(chalk.blueBright("Exporting licenses..."))
+
+await fs.writeFile(
+  "dist/LICENSE-3RD-PARTY.txt",
+  (await util.promisify(child_process.exec)("yarn licenses generate-disclaimer --recursive --production")).stdout,
+)
+
+console.log(chalk.blueBright("Build succeeded!"))
 process.exit(0)
