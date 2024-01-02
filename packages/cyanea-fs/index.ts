@@ -8,6 +8,7 @@ interface FsConfig {
 }
 
 interface FsFilestoreConfig extends FsConfig {
+  pretty?: boolean | number
   target?: "disk" | "filestore"
 }
 
@@ -101,20 +102,34 @@ export default {
   },
   sink: {
     configSchema: fsConfigSchemaBuilder("Path to a JSON file to write Cyanea events to.", {
+      pretty: {
+        type: ["boolean", "integer"],
+        nullable: true,
+        minimum: 0,
+        default: 2,
+        description: "Whether to pretty-print the written JSON events. Defaults to 2 spaces.",
+      },
       target: {
         type: "string",
         enum: ["disk", "filestore"],
         default: "disk",
         nullable: true,
         description: "Whether to write events directly to disk or to the global filestore.",
-      } as const,
-    }),
+      },
+    } as const),
     async load(config) {
       const outPath = resolvePathOrThrow(config.target === "disk" ? process.cwd() : "", config.path)
 
       return {
         async syncEvents(events, filestore) {
-          await (config.target === "disk" ? fs.writeFile : filestore.writeFile)(outPath, JSON.stringify(events))
+          await (config.target === "disk" ? fs.writeFile : filestore.writeFile)(
+            outPath,
+            JSON.stringify(
+              events,
+              undefined,
+              config.pretty === false ? undefined : config.pretty === true ? 2 : config.pretty ?? 2,
+            ),
+          )
         },
       }
     },

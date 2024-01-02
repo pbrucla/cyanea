@@ -20,9 +20,6 @@
     "type": {
       "oneOf": [
         {
-          "type": "null"
-        },
-        {
           "type": "string"
         },
         {
@@ -31,6 +28,8 @@
           "minItems": 1
         }
       ],
+      "type": ["string", "array"],
+      "nullable": true,
       "description": "One or more \"tags\" associated with this event."
     },
     "description": {

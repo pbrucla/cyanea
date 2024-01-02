@@ -1,8 +1,9 @@
 const NOW = new Date()
 
 import { CyaneaFilestore, CyaneaSink, CyaneaSource } from "@pbrucla/cyanea-core"
+import { AJV } from "@pbrucla/cyanea-core/util/index.ts"
 import CyaneaEvent from "@pbrucla/cyanea-core/event"
-import Ajv, { DefinedError } from "ajv"
+import { DefinedError } from "ajv"
 import chalk from "chalk"
 import { Command } from "commander"
 import fs from "node:fs/promises"
@@ -54,8 +55,7 @@ try {
   )
 }
 
-const ajv = new Ajv.default()
-const configV1Validator = ajv.compile(CONFIG_V1_SCHEMA)
+const configV1Validator = AJV.compile(CONFIG_V1_SCHEMA)
 
 let config
 try {

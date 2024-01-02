@@ -1,4 +1,5 @@
-import Ajv, { DefinedError, JSONSchemaType } from "ajv"
+import { AJV } from "@pbrucla/cyanea-core/util/index.ts"
+import { DefinedError, JSONSchemaType } from "ajv"
 import _ from "lodash"
 
 import schema from "./event.schema.json" with { type: "json" }
@@ -20,9 +21,9 @@ export default interface CyaneaEvent {
 }
 
 // TODO microsoft/Typescript#32063 microsoft/Typescript#54488
-export const EVENT_SCHEMA = { ...schema, $schema: undefined } as unknown as JSONSchemaType<CyaneaEvent>
+export const EVENT_SCHEMA = { ...schema, $schema: undefined } as JSONSchemaType<CyaneaEvent>
 
-const EVENT_VALIDATOR = new Ajv.default().compile(EVENT_SCHEMA)
+const EVENT_VALIDATOR = AJV.compile(EVENT_SCHEMA)
 
 export function validateEvent(event: unknown): event is CyaneaEvent {
   return EVENT_VALIDATOR(event)
@@ -36,7 +37,7 @@ export function validateEventOrThrow(event: unknown): asserts event is CyaneaEve
   }
 }
 
-const EVENTS_VALIDATOR = new Ajv.default().compile<CyaneaEvent[]>({
+const EVENTS_VALIDATOR = AJV.compile<CyaneaEvent[]>({
   type: "array",
   items: EVENT_SCHEMA,
 })

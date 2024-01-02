@@ -1,5 +1,6 @@
 import { CyaneaFilestore, CyaneaPlugin, CyaneaSink, CyaneaSource } from "@pbrucla/cyanea-core"
-import Ajv, { DefinedError } from "ajv"
+import { AJV } from "@pbrucla/cyanea-core/util/index.ts"
+import { DefinedError } from "ajv"
 import fs from "node:fs/promises"
 import { createRequire } from "node:module"
 import path from "node:path"
@@ -7,8 +8,6 @@ import url from "node:url"
 
 // injected at build time; points to bundled plugins directory
 const distPluginsFolder = process.env.DIST_PLUGINS_FOLDER
-
-const ajv = new Ajv.default()
 
 export async function loadPluginMainModule(loader: NodeRequire, importPath: string, isModule: boolean): Promise<any> {
   if (isModule) {
@@ -98,7 +97,7 @@ export async function loadPluginComponent<Type extends "filestore" | "source" | 
 
   try {
     const plugin = maybePlugin as CyaneaPlugin<unknown, unknown, unknown>
-    const pluginConfigValidator = ajv.compile(plugin[type].configSchema)
+    const pluginConfigValidator = AJV.compile(plugin[type].configSchema)
     if (!pluginConfigValidator(pluginConfig)) {
       throw `failed to parse plugin config:\n${(pluginConfigValidator.errors as DefinedError[])
         .map(x => `  ${x.schemaPath}: ${x.message}`)

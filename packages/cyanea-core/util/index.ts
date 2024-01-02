@@ -1,5 +1,8 @@
+import Ajv from "ajv"
 import fs from "node:fs/promises"
 import path from "node:path"
+
+export const AJV = new Ajv.default({ allowUnionTypes: true })
 
 /**
  * Sanitizes and resolves a relative path against a base path.
