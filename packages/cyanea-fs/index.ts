@@ -14,7 +14,7 @@ interface FsFilestoreConfig extends FsConfig {
 
 const typescriptWontInferSpreadProperly = <T, U>(t: T, u: U): T & U => ({ ...t, ...u })
 
-const fsConfigSchemaBuilder = <T extends Record<string, any>>(description: string, extra?: T) =>
+const fsConfigSchemaBuilder = <const T extends Record<string, any>>(description: string, extra?: T) =>
   ({
     type: "object",
     properties: typescriptWontInferSpreadProperly(
@@ -116,7 +116,7 @@ export default {
         default: "disk",
         description: "Whether to write events directly to disk or to the global filestore.",
       },
-    } as const),
+    }),
     async load(config) {
       const outPath = resolvePathOrThrow(config.target === "disk" ? process.cwd() : "", config.path)
 

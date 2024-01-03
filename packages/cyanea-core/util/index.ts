@@ -47,3 +47,27 @@ export function orDefault<T>(configVal: T | boolean | null | undefined, defaultV
     return configVal
   }
 }
+
+/**
+ * Reads a set of credentials from the environment with the given prefix and key names.
+ * @returns An object with the requested credentials, or `null` if any key is unspecified and has no default.
+ */
+export function getEnvCredentials<const K extends (string | { key: string; default: string })[]>(
+  prefix: string,
+  ...envKeys: K
+): { [key in K[number] as Lowercase<key extends { key: string } ? key["key"] : key>]: string } | null {
+  const out: Record<string, string> = {}
+  for (const key of envKeys) {
+    if (typeof key === "string") {
+      const value = process.env[`${prefix}_${key}`]
+      if (value === null || value === undefined) {
+        return null
+      } else {
+        out[key.toLowerCase()] = value
+      }
+    } else {
+      out[key.key.toLowerCase()] = process.env[`${prefix}_${key.key}`] ?? key.default
+    }
+  }
+  return out as ReturnType<typeof getEnvCredentials<K>>
+}

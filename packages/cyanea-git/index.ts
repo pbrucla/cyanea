@@ -1,5 +1,5 @@
 import { CyaneaPlugin } from "@pbrucla/cyanea-core"
-import { resolvePathOrThrow } from "@pbrucla/cyanea-core/util/index.ts"
+import { getEnvCredentials, resolvePathOrThrow } from "@pbrucla/cyanea-core/util/index.ts"
 import chalk from "chalk"
 import git, { GitAuth, TreeEntry } from "isomorphic-git"
 import http from "isomorphic-git/http/node"
@@ -15,25 +15,6 @@ import path from "node:path"
 //
 // - CYANEA_GIT_REMOTE_USERNAME
 // - CYANEA_GIT_REMOTE_PASSWORD
-function getEnvCredentials<K extends (string | { key: string; default: string })[]>(
-  prefix: string,
-  ...envKeys: K
-): { [key in K[number] as Lowercase<key extends { key: string } ? key["key"] : key>]: string } | null {
-  const out: Record<string, string> = {}
-  for (const key of envKeys) {
-    if (typeof key === "string") {
-      const value = process.env[`${prefix}_${key}`]
-      if (value === null || value === undefined) {
-        return null
-      } else {
-        out[key.toLowerCase()] = value
-      }
-    } else {
-      out[key.key.toLowerCase()] = process.env[`${prefix}_${key.key}`] ?? key.default
-    }
-  }
-  return out as ReturnType<typeof getEnvCredentials<K>>
-}
 
 function remoteCredentialsCallback(action: string, creds: GitAuth | null): () => GitAuth | void {
   return () => {
@@ -146,7 +127,7 @@ export default {
       }
 
       const remoteCreds = getEnvCredentials("CYANEA_GIT_REMOTE", "USERNAME", "PASSWORD")
-      const commitCreds = getEnvCredentials("CYANEA_GIT_COMMIT", "KEY", { key: "PASSPHRASE", default: "" } as const)
+      const commitCreds = getEnvCredentials("CYANEA_GIT_COMMIT", "KEY", { key: "PASSPHRASE", default: "" })
 
       const tempRepoFolder: string | null = null
       let repo: string
