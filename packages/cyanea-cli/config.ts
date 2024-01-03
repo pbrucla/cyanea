@@ -9,6 +9,7 @@ export interface CyaneaConfigV1 {
 
 export const CONFIG_V1_SCHEMA: JSONSchemaType<CyaneaConfigV1> = {
   type: "object",
+  description: "Cyanea config format.",
   definitions: {
     plugins: {
       type: "object",
@@ -46,7 +47,6 @@ export const CONFIG_V1_SCHEMA: JSONSchemaType<CyaneaConfigV1> = {
     },
   },
   required: ["version", "source", "filestore", "sinks"],
-  description: "Cyanea config format.",
 }
 
 export type CyaneaConfig = CyaneaConfigV1

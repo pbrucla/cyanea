@@ -88,7 +88,7 @@ await fs.mkdir("dist/schemas", { recursive: true })
 await fs.copyFile("packages/cyanea-core/event/event.schema.json", "dist/schemas/event.schema.json")
 await fs.copyFile("packages/cyanea-core/event/events.schema.json", "dist/schemas/events.schema.json")
 
-const finalConfigSchema = CONFIG_V1_SCHEMA
+const finalConfigSchema = Object.assign({ $schema: "https://json-schema.org/draft-07/schema#" }, CONFIG_V1_SCHEMA)
 finalConfigSchema.properties!.filestore["properties"] = configs.filestore
 finalConfigSchema.properties!.source["properties"] = configs.source
 finalConfigSchema.properties!.sinks["properties"] = configs.sink
