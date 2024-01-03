@@ -129,18 +129,9 @@ export default {
               description: "The branch on the Git repository to clone from/push to.",
             },
             push: {
-              oneOf: [
-                {
-                  type: "null",
-                },
-                {
-                  type: "boolean",
-                },
-                {
-                  type: "string",
-                },
-              ],
+              type: ["boolean", "string"],
               default: true,
+              nullable: true,
               description:
                 "Whether to push this filestore after committing. If a string, this also specifies the remote to push to instead of the default upstream.",
             },
@@ -227,7 +218,7 @@ export default {
             },
           })
 
-          if (config.push === undefined || config.push) {
+          if (config.push !== false) {
             await git.push({
               fs,
               http,

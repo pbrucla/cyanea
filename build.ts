@@ -85,15 +85,14 @@ for (const p of packages) {
 console.log(chalk.blueBright("Exporting schemas..."))
 
 await fs.mkdir("dist/schemas", { recursive: true })
-await fs.copyFile("packages/cyanea-core/event/event.schema.json", "dist/schemas/event.json")
-await fs.copyFile("packages/cyanea-core/event/events.schema.json", "dist/schemas/events.json")
+await fs.copyFile("packages/cyanea-core/event/event.schema.json", "dist/schemas/event.schema.json")
+await fs.copyFile("packages/cyanea-core/event/events.schema.json", "dist/schemas/events.schema.json")
 
 const finalConfigSchema = CONFIG_V1_SCHEMA
 finalConfigSchema.properties!.filestore["properties"] = configs.filestore
 finalConfigSchema.properties!.source["properties"] = configs.source
 finalConfigSchema.properties!.sinks["properties"] = configs.sink
-
-await fs.writeFile("dist/schemas/config.json", JSON.stringify(finalConfigSchema, undefined, 2))
+await fs.writeFile("dist/schemas/config.schema.json", JSON.stringify(finalConfigSchema, undefined, 2))
 
 console.log(chalk.blueBright("Exporting licenses..."))
 

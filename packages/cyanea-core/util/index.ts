@@ -34,3 +34,16 @@ export async function* walk(dir: string): AsyncGenerator<string, undefined> {
     else if (d.isFile()) yield entry
   }
 }
+
+/**
+ * Given a value from a config, returns either the given value if specified, the default value if true or unspecified, or undefined if false.
+ */
+export function orDefault<T>(configVal: T | boolean | null | undefined, defaultVal: T): T | undefined {
+  if (configVal === true || configVal === undefined || configVal === null) {
+    return defaultVal
+  } else if (configVal === false) {
+    return undefined
+  } else {
+    return configVal
+  }
+}

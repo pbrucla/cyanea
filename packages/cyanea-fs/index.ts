@@ -1,6 +1,6 @@
 import { CyaneaPlugin } from "@pbrucla/cyanea-core"
 import { validateEventsOrThrow } from "@pbrucla/cyanea-core/event/index.ts"
-import { resolvePathOrThrow, walk } from "@pbrucla/cyanea-core/util/index.ts"
+import { orDefault, resolvePathOrThrow, walk } from "@pbrucla/cyanea-core/util/index.ts"
 import fs from "node:fs/promises"
 
 interface FsConfig {
@@ -112,8 +112,8 @@ export default {
       target: {
         type: "string",
         enum: ["disk", "filestore"],
-        default: "disk",
         nullable: true,
+        default: "disk",
         description: "Whether to write events directly to disk or to the global filestore.",
       },
     } as const),
@@ -124,11 +124,7 @@ export default {
         async syncEvents(events, filestore) {
           await (config.target === "disk" ? fs.writeFile : filestore.writeFile)(
             outPath,
-            JSON.stringify(
-              events,
-              undefined,
-              config.pretty === false ? undefined : config.pretty === true ? 2 : config.pretty ?? 2,
-            ),
+            JSON.stringify(events, undefined, orDefault(config.pretty, 2)),
           )
         },
       }
