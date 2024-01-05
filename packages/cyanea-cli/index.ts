@@ -1,4 +1,4 @@
-const NOW = new Date()
+let NOW = new Date()
 
 import { CyaneaFilestore, CyaneaSink, CyaneaSource } from "@pbrucla/cyanea-core"
 import { AJV } from "@pbrucla/cyanea-core/util/index.ts"
@@ -29,6 +29,7 @@ const command: Command = new Command()
   .description("ACM Cyber's modular script for syncing unified event information across disparate platforms!")
   .requiredOption("-c, --config <cyanea.json>", "set the Cyanea config file", "cyanea.json")
   .option("--cwd <cwd>", "set Cyanea's current working directory for resolving files and plugins", process.cwd())
+  .option("--now <now>", "run Cyanea as if the current time was the given UNIX timestamp")
   .option("--color", "enable coloring output", true)
   .option("--no-color", "disable coloring output")
   .version(process.env.npm_package_version || "unknown", "-v, --version")
@@ -38,6 +39,9 @@ const command: Command = new Command()
 const opts = command.parse(process.argv).opts()
 
 process.chdir(opts.cwd)
+if (opts.now !== undefined && opts.now !== null) {
+  NOW = new Date(parseInt(opts.now))
+}
 
 // ===========
 // Load config
