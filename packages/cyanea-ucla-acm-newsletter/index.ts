@@ -194,6 +194,39 @@ export default {
         async syncEvents(events, _filestore, now) {
           const luxNow = DateTime.fromJSDate(now, { zone: timezone })
 
+          // preprocess events a bit
+          const processedEvents = events.map(e => {
+            // run a couple of sanity checks
+            if (e.end < e.start) {
+              throw `event with id ${e.id} ends before it starts`
+            }
+
+            // remove metadata from events that cannot be represented in the newsletter
+            // so that diffing with data from the newsletter works later
+            e.type = undefined
+            if (e.links) {
+              if ("discord" in e.links) {
+                e.links = { discord: e.links.discord }
+              } else if ("facebook" in e.links) {
+                e.links = { discord: e.links.facebook }
+              } else {
+                e.links = undefined
+              }
+            } else {
+              e.links = undefined
+            }
+            e.meta = undefined
+
+            // drop anything higher than minute precision because
+            // the acm newsletter only supports minute precision
+            const start = DateTime.fromMillis(e.start, { zone: timezone }).startOf("minute")
+            const end = DateTime.fromMillis(e.end, { zone: timezone }).startOf("minute")
+            e.start = start.toMillis()
+            e.end = start.toMillis()
+
+            return [e, { start, end }] as const
+          })
+
           // for each quarter...
           for (const quarter of resolvedQuarters) {
             // update only quarter(s) that intersect the current time
@@ -231,53 +264,23 @@ export default {
                 // figure out what events occur this week
                 // this will throw on events that end before they begin
                 // and ignore events that cross day and/or week boundaries
-                const eventsThisWeek = events
-                  .flatMap(e => {
-                    if (e.end < e.start) {
-                      throw `event with id ${e.id} ends before it starts`
-                    }
-
-                    // drop anything higher than minute precision because
-                    // the acm newsletter only supports minute precision
-                    const start = DateTime.fromMillis(e.start, { zone: timezone }).startOf("minute")
-                    const end = DateTime.fromMillis(e.end, { zone: timezone }).startOf("minute")
-                    e.start = start.toMillis()
-                    e.end = start.toMillis()
-
-                    // only include this event if it occurs entirely within this week
-                    if (start >= startOfWeek && end < endOfWeek) {
-                      if (start.startOf("day").toMillis() != end.startOf("day").toMillis()) {
-                        console.warn(
-                          chalk.yellow(
-                            ` warn: refusing to sync event ${e.id} that spans multiple days (the ACM newsletter does not currently support multiple-day events)`,
-                          ),
-                        )
-                        return []
-                      } else {
-                        return [e]
-                      }
-                    } else {
+                const eventsThisWeek = processedEvents.flatMap(([e, l]) => {
+                  // only include this event if it occurs entirely within this week
+                  if (l.start >= startOfWeek && l.end < endOfWeek) {
+                    if (l.start.startOf("day").toMillis() != l.end.startOf("day").toMillis()) {
+                      console.warn(
+                        chalk.yellow(
+                          ` warn: refusing to sync event ${e.id} that spans multiple days (the ACM newsletter does not currently support multiple-day events)`,
+                        ),
+                      )
                       return []
-                    }
-                  })
-                  .map(e => {
-                    // remove metadata from events that cannot be represented in the newsletter
-                    // so that diffing with data from the newsletter works later
-                    e.type = undefined
-                    if (e.links) {
-                      if ("discord" in e.links) {
-                        e.links = { discord: e.links.discord }
-                      } else if ("facebook" in e.links) {
-                        e.links = { discord: e.links.facebook }
-                      } else {
-                        e.links = undefined
-                      }
                     } else {
-                      e.links = undefined
+                      return [e]
                     }
-                    e.meta = undefined
-                    return e
-                  })
+                  } else {
+                    return []
+                  }
+                })
 
                 // grab events from this week that were previously sync'd to the newsletter,
                 // making sure to keep track of which row an event originates from for later updating
@@ -401,6 +404,7 @@ export default {
               }
 
               // finally, write all changes back to the sheet for this quarter!
+              console.debug(`Pushing ${rowsToUpdate.length} updated ranges to Google Sheets...`)
               await sheets.batchUpdate({
                 auth: jwtClient,
                 spreadsheetId: quarter.googleSheetId,
