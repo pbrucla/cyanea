@@ -14,7 +14,8 @@
   "dependencies": {
     "@pbrucla/cyanea-cli": "workspace:^",
     "@pbrucla/cyanea-fs": "workspace:^",
-    "@pbrucla/cyanea-git": "workspace:^"
+    "@pbrucla/cyanea-git": "workspace:^",
+    "@pbrucla/cyanea-ucla-acm-newsletter": "workspace:^"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^1.5.1",
