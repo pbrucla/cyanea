@@ -346,8 +346,7 @@ __metadata:
     "@pbrucla/cyanea-core": "workspace:^"
     "@types/luxon": "npm:^3"
     "@types/node": "npm:^20.10.5"
-    chalk: "npm:^5.3.0"
-    googleapis: "npm:^130.0.0"
+    googleapis: "npm:=129.0.0"
     luxon: "npm:^3.4.4"
     tslib: "npm:^2.6.2"
     typescript: "npm:5.3.1-rc"
@@ -376,7 +375,7 @@ __metadata:
     "@types/luxon": "npm:^3"
     "@types/node": "npm:^20.10.5"
     chalk: "npm:^5.3.0"
-    googleapis: "npm:^130.0.0"
+    googleapis: "npm:=129.0.0"
     luxon: "npm:^3.4.4"
     tslib: "npm:^2.6.2"
     typescript: "npm:5.3.1-rc"
@@ -1860,13 +1859,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"googleapis@npm:^130.0.0":
-  version: 130.0.0
-  resolution: "googleapis@npm:130.0.0"
+"googleapis@npm:=129.0.0":
+  version: 129.0.0
+  resolution: "googleapis@npm:129.0.0"
   dependencies:
     google-auth-library: "npm:^9.0.0"
     googleapis-common: "npm:^7.0.0"
-  checksum: 3d1bcedce322a7c0a657318710e939c509a69269de9e6c1571131e37e823196bb23a9b14ba3eb7061bdd0fb98d57c9d7efc53207d77a8639a7c6e440810cedae
+  checksum: a1e078b2c3da1a1fe3ba1de1233700872c973fb49a6254c59a83c2c1884f4493b059fe43e7bb65226b9493c429da69e09e842368c82abb8c52118d2dbc657da3
   languageName: node
   linkType: hard
 

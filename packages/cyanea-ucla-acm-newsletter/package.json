@@ -5,7 +5,7 @@
   "dependencies": {
     "@pbrucla/cyanea-core": "workspace:^",
     "chalk": "^5.3.0",
-    "googleapis": "^130.0.0",
+    "googleapis": "=129.0.0",
     "luxon": "^3.4.4",
     "tslib": "^2.6.2"
   },
