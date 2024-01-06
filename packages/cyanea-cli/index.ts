@@ -124,7 +124,7 @@ console.log(chalk.blueBright(`Syncing ${numSinks} sink${numSinks !== 1 ? "s" : "
 try {
   const results = await Promise.allSettled(
     Object.entries(modules.sinks).map(([name, module]) =>
-      module.syncEvents(events, modules.filestore, NOW).catch(reason => {
+      module.syncEvents(structuredClone(events), modules.filestore, NOW).catch(reason => {
         throw `  ${name}: ${reason}`
       }),
     ),
