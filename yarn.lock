@@ -339,6 +339,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@pbrucla/cyanea-gcal@workspace:^, @pbrucla/cyanea-gcal@workspace:packages/cyanea-gcal":
+  version: 0.0.0-use.local
+  resolution: "@pbrucla/cyanea-gcal@workspace:packages/cyanea-gcal"
+  dependencies:
+    "@pbrucla/cyanea-core": "workspace:^"
+    "@types/luxon": "npm:^3"
+    "@types/node": "npm:^20.10.5"
+    chalk: "npm:^5.3.0"
+    googleapis: "npm:^130.0.0"
+    luxon: "npm:^3.4.4"
+    tslib: "npm:^2.6.2"
+    typescript: "npm:5.3.1-rc"
+  languageName: unknown
+  linkType: soft
+
 "@pbrucla/cyanea-git@workspace:^, @pbrucla/cyanea-git@workspace:packages/cyanea-git":
   version: 0.0.0-use.local
   resolution: "@pbrucla/cyanea-git@workspace:packages/cyanea-git"
@@ -374,6 +389,7 @@ __metadata:
   dependencies:
     "@pbrucla/cyanea-cli": "workspace:^"
     "@pbrucla/cyanea-fs": "workspace:^"
+    "@pbrucla/cyanea-gcal": "workspace:^"
     "@pbrucla/cyanea-git": "workspace:^"
     "@pbrucla/cyanea-ucla-acm-newsletter": "workspace:^"
     "@stylistic/eslint-plugin": "npm:^1.5.1"

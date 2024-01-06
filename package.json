@@ -14,6 +14,7 @@
   "dependencies": {
     "@pbrucla/cyanea-cli": "workspace:^",
     "@pbrucla/cyanea-fs": "workspace:^",
+    "@pbrucla/cyanea-gcal": "workspace:^",
     "@pbrucla/cyanea-git": "workspace:^",
     "@pbrucla/cyanea-ucla-acm-newsletter": "workspace:^"
   },
