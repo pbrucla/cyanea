@@ -57,6 +57,7 @@
       "type": "object",
       "properties": {
         "discord": { "type": "string" },
+        "slides": { "type": "string" },
         "twitch": { "type": "string" },
         "youtube": { "type": "string" },
         "zoom": { "type": "string" }
