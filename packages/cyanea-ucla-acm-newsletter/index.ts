@@ -222,7 +222,7 @@ export default {
             const start = DateTime.fromMillis(e.start, { zone: timezone }).startOf("minute")
             const end = DateTime.fromMillis(e.end, { zone: timezone }).startOf("minute")
             e.start = start.toMillis()
-            e.end = start.toMillis()
+            e.end = end.toMillis()
 
             return [e, { start, end }] as const
           })
@@ -336,7 +336,7 @@ export default {
                     throw `idToRow map doesn't have existing event ${replaceId} (this should never happen)`
                   const updateRow = idToRow.get(replaceId)! + 1
                   const start = DateTime.fromMillis(eventToUpdate.start, { zone: timezone })
-                  const end = DateTime.fromMillis(eventToUpdate.start, { zone: timezone })
+                  const end = DateTime.fromMillis(eventToUpdate.end, { zone: timezone })
 
                   rowsToUpdate.push({
                     range: `'Week ${week}'!A${updateRow}:I${updateRow}`,
@@ -378,7 +378,7 @@ export default {
                   let nextEmptyRow = existingSheetRows[week - 1].values!.length + 1
                   for (const addedEvent of added.slice(removed.length)) {
                     const start = DateTime.fromMillis(addedEvent.start, { zone: timezone })
-                    const end = DateTime.fromMillis(addedEvent.start, { zone: timezone })
+                    const end = DateTime.fromMillis(addedEvent.end, { zone: timezone })
                     rowsToUpdate.push({
                       range: `'Week ${week}'!A${nextEmptyRow}:${CYANEA_METADATA_COLUMN}${nextEmptyRow}`,
                       values: [
