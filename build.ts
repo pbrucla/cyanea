@@ -9,7 +9,11 @@ import util from "node:util"
 function generateBanner(packageName: string): { js: string } {
   // fixes https://github.com/evanw/esbuild/issues/1921#issuecomment-1152991694
   return {
-    js: `/** ${packageName} - ACM Cyber's modular script for syncing unified event information across disparate platforms! **/\nvar require=(await import("module")).createRequire(import.meta.url)`,
+    js: `/** ${packageName} - ACM Cyber's modular script for syncing unified event information across disparate platforms! **/\nvar require=(await import("module")).createRequire(import.meta.url)${
+      packageName === "@pbrucla/cyanea-discord"
+        ? `;var __dirname=(await import("path")).dirname((await import("url")).fileURLToPath(import.meta.url))`
+        : ""
+    }`,
   }
 }
 
@@ -42,6 +46,7 @@ await esbuild.build({
   banner: generateBanner("cyanea"),
   define: {
     "process.env.DIST_PLUGINS_FOLDER": `"plugins"`,
+    "process.env.FLUENTFFMPEG_COV": "false",
   },
   ...COMMON_ESLINT_OPTS,
 })
@@ -78,6 +83,9 @@ for (const p of packages) {
     entryPoints: [`packages/${p}/index.ts`],
     outfile: `dist/plugins/@pbrucla/${p}.mjs`,
     banner: generateBanner(`@pbrucla/${p}`),
+    define: {
+      "process.env.FLUENTFFMPEG_COV": "false",
+    },
     ...COMMON_ESLINT_OPTS,
   })
 }

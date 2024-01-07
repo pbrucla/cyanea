@@ -1,0 +1,24 @@
+{
+  "name": "@pbrucla/cyanea-discord",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@discordjs/rest": "^2.2.0",
+    "@pbrucla/cyanea-core": "workspace:^",
+    "chalk": "^5.3.0",
+    "discord-api-types": "^0.37.67",
+    "fluent-ffmpeg": "^2.1.2",
+    "stegcloak": "^1.1.1",
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2",
+    "@types/node": "^20.10.5",
+    "@types/stegcloak": "^1",
+    "typescript": "5.3.1-rc"
+  },
+  "engines": {
+    "node": ">=21.0.0"
+  },
+  "packageManager": "yarn@4.0.2"
+}
