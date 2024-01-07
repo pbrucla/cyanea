@@ -217,6 +217,9 @@ export default {
             }
             e.meta = undefined
 
+            // make sure banner is set to some value for diffing
+            e.banner ??= ""
+
             // drop anything higher than minute precision because
             // the acm newsletter only supports minute precision
             const start = DateTime.fromMillis(e.start, { zone: timezone }).startOf("minute")

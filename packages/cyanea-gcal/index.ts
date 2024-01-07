@@ -88,6 +88,9 @@ export default {
             e.links = undefined
             e.meta = undefined
 
+            // make sure banner is set to some value for diffing
+            e.banner ??= undefined
+
             // drop anything higher than second precision because
             // gcal only supports second precision
             e.start = DateTime.fromMillis(e.start, { zone: timezone }).startOf("second").toMillis()
