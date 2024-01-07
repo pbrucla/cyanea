@@ -20,3 +20,6 @@ runs:
     - ${{ inputs.config }}
     - ${{ inputs.cwd }}
     - ${{ inputs.now }}
+branding:
+  icon: "cloud-lightning"
+  color: "yellow"
