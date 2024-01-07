@@ -195,10 +195,15 @@ export default {
           const luxNow = DateTime.fromJSDate(now, { zone: timezone })
 
           // preprocess events a bit
-          const processedEvents = events.map(e => {
+          const processedEvents = events.flatMap(e => {
             // run a couple of sanity checks
             if (e.end < e.start) {
               throw `event with id ${e.id} ends before it starts`
+            }
+
+            // don't advertise to the newsletter things like the ACM GM lmao
+            if (e.meta?.["ignore-for-acm-newsletter"]) {
+              return []
             }
 
             // remove metadata from events that cannot be represented in the newsletter
@@ -227,7 +232,7 @@ export default {
             e.start = start.toMillis()
             e.end = end.toMillis()
 
-            return [e, { start, end }] as const
+            return [[e, { start, end }]] as const
           })
 
           // for each quarter...
