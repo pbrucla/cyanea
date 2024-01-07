@@ -4,18 +4,18 @@ FROM node:21.4-alpine3.18
 RUN apk add --no-cache ffmpeg
 
 # build cyanea
-RUN mkdir build && mkdir build/packages && mkdir build/.yarn
-COPY .yarn/plugins build/.yarn/plugins/
-COPY .yarnrc.yml build.ts package.json tsconfig.json yarn.lock build/
-COPY packages build/packages/
-RUN cd build && \
+RUN mkdir -p /cyanea/build && mkdir /cyanea/build/packages && mkdir /cyanea/build/.yarn
+COPY .yarn/plugins /cyanea/build/.yarn/plugins/
+COPY .yarnrc.yml build.ts package.json tsconfig.json yarn.lock /cyanea/build/
+COPY packages /cyanea/build/packages/
+RUN cd /cyanea/build && \
   yarn set version 4.0.2 && \
-  yarn workspaces foreach -A install && \
+  yarn install && \
   yarn build && \
   cd .. && \
   mv build/dist/* ./ && \
   rm -rf build
 
 # add entrypoint
-COPY action/entrypoint.sh entrypoint.sh
-ENTRYPOINT [ "entrypoint.sh" ]
+COPY action/entrypoint.sh /cyanea/entrypoint.sh
+ENTRYPOINT [ "/cyanea/entrypoint.sh" ]
