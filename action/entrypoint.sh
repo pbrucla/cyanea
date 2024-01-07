@@ -20,4 +20,4 @@ if [ ! -z "$NOW" ]; then
 	set -- "$@" --now "$NOW"
 fi
 
-node cyanea.mjs "$@"
+node /cyanea/cyanea.mjs "$@"
