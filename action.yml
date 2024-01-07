@@ -1,0 +1,22 @@
+name: "Cyanea"
+description: "ACM Cyber's modular script for syncing unified event information across disparate platforms!"
+inputs:
+  config:
+    description: "Path to the Cyanea config file."
+    required: true
+    default: ""
+  cwd:
+    description: "Cyanea's current working directory for resolving files and plugins."
+    required: true
+    default: ""
+  now:
+    description: "Run Cyanea as if the current time was the given UNIX timestamp."
+    required: true
+    default: ""
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - ${{ inputs.config }}
+    - ${{ inputs.cwd }}
+    - ${{ inputs.now }}
