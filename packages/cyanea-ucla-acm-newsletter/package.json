@@ -1,6 +1,8 @@
 {
   "name": "@pbrucla/cyanea-ucla-acm-newsletter",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "author": "ACM Cyber <uclacyber@gmail.com> (https://www.acmcyber.com/)",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "@pbrucla/cyanea-core": "workspace:^",
