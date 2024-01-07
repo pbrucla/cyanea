@@ -1,6 +1,10 @@
 {
   "name": "@pbrucla/cyanea",
   "private": true,
+  "version": "1.0.0",
+  "author": "ACM Cyber <uclacyber@gmail.com> (https://www.acmcyber.com/)",
+  "license": "MIT",
+  "description": "ACM Cyber's modular script for syncing unified event information across disparate platforms!",
   "type": "module",
   "workspaces": [
     "packages/*",
