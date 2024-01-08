@@ -162,16 +162,58 @@ export default {
             head = null
           }
 
-          const tree: Map<string, TreeEntry> =
-            head !== null
-              ? new Map((await git.readTree({ fs, dir: repo, oid: head })).tree.map(x => [x.path, x]))
-              : new Map()
+          type UncommittedTreeEntry = Map<string, UncommittedTreeEntry | Buffer>
+          const treesToWrite: UncommittedTreeEntry = new Map()
 
           for (const [name, content] of files) {
-            const blob = await git.writeBlob({ fs, dir: repo, blob: content })
-            tree.set(name, { mode: "100644", path: name, oid: blob, type: "blob" })
+            const nameParts = name.split(path.sep)
+            let subtree = treesToWrite
+            for (const pathComponent of nameParts.slice(0, -1)) {
+              if (subtree.has(pathComponent)) {
+                const possiblyNextSubtree = subtree.get(pathComponent)!
+                if (possiblyNextSubtree instanceof Buffer) {
+                  throw `invalid filestore path '${name}' detected: ${pathComponent} is not a directory`
+                }
+                subtree = possiblyNextSubtree
+              } else {
+                subtree.set(pathComponent, new Map())
+                subtree = subtree.get(pathComponent)! as UncommittedTreeEntry
+              }
+            }
+            subtree.set(nameParts.at(-1)!, content)
           }
-          const treeId = await git.writeTree({ fs, dir: repo, tree: [...tree.values()] })
+
+          async function writeTreeRecursively(
+            treeId: string | undefined,
+            entry: UncommittedTreeEntry,
+          ): Promise<string> {
+            const tree: Map<string, TreeEntry> =
+              treeId !== undefined
+                ? new Map((await git.readTree({ fs, dir: repo, oid: treeId })).tree.map(x => [x.path, x]))
+                : new Map()
+
+            for (const [subtreeName, subtreeEntry] of entry) {
+              if (subtreeEntry instanceof Map) {
+                const existingSubtree = tree.get(subtreeName)
+                if (existingSubtree !== undefined && existingSubtree.type !== "tree") {
+                  throw `invalid filestore path detected: ${subtreeName} is not a directory`
+                }
+                tree.set(subtreeName, {
+                  mode: "040000",
+                  path: subtreeName,
+                  oid: await writeTreeRecursively(existingSubtree?.oid, subtreeEntry),
+                  type: "tree",
+                })
+              } else {
+                const blob = await git.writeBlob({ fs, dir: repo, blob: subtreeEntry })
+                tree.set(subtreeName, { mode: "100644", path: subtreeName, oid: blob, type: "blob" })
+              }
+            }
+
+            return await git.writeTree({ fs, dir: repo, tree: [...tree.values()] })
+          }
+
+          const treeId = await writeTreeRecursively(head ?? undefined, treesToWrite)
 
           const author = { name: "Cyanea Git Bot", email: "cyanea-git@acmcyber.com" }
           await git.commit({
