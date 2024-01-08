@@ -237,9 +237,9 @@ export default {
 
           // for each quarter...
           for (const quarter of resolvedQuarters) {
-            // update only quarter(s) that intersect the current time
+            // update only quarter(s) that haven't ended yet
             const endOfQuarter = quarter.weekOneMonday.plus({ weeks: quarter.weeks })
-            if (luxNow >= quarter.weekOneMonday && luxNow < endOfQuarter) {
+            if (luxNow < endOfQuarter) {
               // grab existing rows in the sheet for diffing
               const existingSheetRows = (
                 await sheets.batchGet({
