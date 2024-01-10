@@ -35,12 +35,12 @@ interface StegcloakdCyaneaMetadata {
   // event id
   i: string
   // event banner url
-  b: string | null
+  b?: string | undefined
 }
 
-function stegcloakEventDescription(event: CyaneaEvent): string {
-  const metadata: StegcloakdCyaneaMetadata = { i: event.id, b: event.banner ?? null }
-  return stegcloak.hide(JSON.stringify(metadata), "", event.description)
+function stegcloakEventDescription(id: string, banner: string | null | undefined, description: string): string {
+  const metadata: StegcloakdCyaneaMetadata = { i: id, ...(banner ? { b: banner } : {}) }
+  return stegcloak.hide(JSON.stringify(metadata), "", description)
 }
 
 async function toDiscordEvent(event: CyaneaEvent): Promise<RESTPostAPIGuildScheduledEventJSONBody> {
@@ -88,9 +88,9 @@ async function toDiscordEvent(event: CyaneaEvent): Promise<RESTPostAPIGuildSched
 
   // build the discord event!
   // if the banner image can't fit in the metadata just drop it lol
-  let description = stegcloakEventDescription(event)
+  let description = stegcloakEventDescription(event.id, event.banner, event.description)
   if (description.length > 1000) {
-    description = stegcloakEventDescription({ ...event, banner: null })
+    description = stegcloakEventDescription(event.id, undefined, event.description)
     if (description.length > 1000) {
       throw `event ${event.id}'s stegcloak'd event id + description is longer than 1000 characters (this should have been thrown as an earlier exception !??)`
     }
@@ -166,8 +166,8 @@ export default {
                 ),
               )
               return []
-            } else if (stegcloakEventDescription(e).length > 1000) {
-              if (stegcloakEventDescription({ ...e, banner: null }).length > 1000) {
+            } else if (stegcloakEventDescription(e.id, e.banner, e.description).length > 1000) {
+              if (stegcloakEventDescription(e.id, undefined, e.description).length > 1000) {
                 throw `cannot sync event ${e.id} to Discord - stegcloak'd event id + description is longer than 1000 characters`
               }
               console.warn(
@@ -184,8 +184,8 @@ export default {
             e.links = undefined
             e.meta = undefined
 
-            // force banners to be null if undefined, so that they are
-            // *always* represented in StegcloakdCyaneaMetadata
+            // force banners to be null if undefined
+            // for diffing with StegcloakdCyaneaMetadata
             e.banner ??= null
 
             return [e]
@@ -229,7 +229,6 @@ export default {
             try {
               parsedMetadata = JSON.parse(cyaneaMetadata)
               if (!("i" in parsedMetadata)) throw "no i field found"
-              if (!("b" in parsedMetadata)) throw "no b field found"
             } catch (e) {
               console.warn(
                 chalk.yellow(` warn: failed to parse stegcloak'd Cyanea metadata in event ${discordEvent.id}: ${e}`),
@@ -251,7 +250,7 @@ export default {
               type: undefined,
               description: discordEvent.description.replaceAll(zwcRegex, ""),
               location: discordEvent.entity_metadata?.location ?? "",
-              banner: parsedMetadata.b,
+              banner: parsedMetadata.b ?? null,
               start,
               end,
               links: undefined,
