@@ -21,6 +21,7 @@ const NEWSLETTER_PARSE_FORMAT_2 = `yyyy-M-d t`
 
 const CYANEA_METADATA_COLUMN = "M"
 const CYANEA_METADATA_COLUMN_INDEX = CYANEA_METADATA_COLUMN.charCodeAt(0) - "A".charCodeAt(0)
+const CYANEA_FIRST_SAFE_ROW = 2
 const CYANEA_LAST_SAFE_COLUMN = "J".charCodeAt(0) - "A".charCodeAt(0)
 
 // TODO document credentials:
@@ -385,11 +386,13 @@ export default {
                 } else if (added.length > removed.length) {
                   // add the rest of the events at the bottom
                   let nextEmptyRow =
-                    existingSheetRows[week - 1].values!.findIndex(r =>
-                      r
-                        .slice(0, CYANEA_LAST_SAFE_COLUMN + 1)
-                        .every(x => x === null || x === undefined || (typeof x === "string" && x.trim().length == 0)),
-                    ) + 1
+                    existingSheetRows[week - 1]
+                      .values!.slice(CYANEA_FIRST_SAFE_ROW)
+                      .findIndex(r =>
+                        r
+                          .slice(0, CYANEA_LAST_SAFE_COLUMN + 1)
+                          .every(x => x === null || x === undefined || (typeof x === "string" && x.trim().length == 0)),
+                      ) + 1
                   if (nextEmptyRow === 0) {
                     nextEmptyRow = existingSheetRows[week - 1].values!.length + 1
                   }
