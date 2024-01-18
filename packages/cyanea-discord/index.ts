@@ -24,8 +24,12 @@ const zwcRegex = new RegExp(`[${zwc.join("")}]`, "g")
 
 // TODO document credentials:
 //
-// - CYANEA_GCAL_CLIENT_EMAIL
-// - CYANEA_GCAL_PRIVATE_KEY
+// - CYANEA_DISCORD_TOKEN
+
+// Since this Discord sync code can't automatically update images
+// if they're later updated elsewhere, you can define the following
+// env variable to force an image resync
+const FORCE_RESYNC_IMAGES = process.env.CYANEA_DISCORD_FORCE_RESYNC_IMAGES === "true"
 
 interface DiscordConfig {
   guildId: string
@@ -250,7 +254,7 @@ export default {
               type: undefined,
               description: discordEvent.description.replaceAll(zwcRegex, ""),
               location: discordEvent.entity_metadata?.location ?? "",
-              banner: parsedMetadata.b ?? null,
+              banner: FORCE_RESYNC_IMAGES ? null : parsedMetadata.b ?? null,
               start,
               end,
               links: undefined,

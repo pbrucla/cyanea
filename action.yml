@@ -13,6 +13,10 @@ inputs:
     description: "Run Cyanea as if the current time was the given UNIX timestamp."
     required: true
     default: ""
+  force_resync_discord_images:
+    description: "Force @pbrucla/cyanea-discord to resync all event banners. This is useful if those event banners were externally updated and you want those changes to reflect on Discord."
+    required: false
+    default: "" 
 runs:
   using: "docker"
   image: "Dockerfile"
@@ -20,6 +24,7 @@ runs:
     - ${{ inputs.config }}
     - ${{ inputs.cwd }}
     - ${{ inputs.now }}
+    - ${{ inputs.force_resync_discord_images }}
 branding:
   icon: "cloud-lightning"
   color: "yellow"
