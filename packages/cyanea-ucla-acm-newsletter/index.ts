@@ -58,7 +58,16 @@ function tryParseDateAndTime(date: any, time: any, zone: IANAZone): DateTime {
   try {
     return DateTime.fromFormat(`${date} ${time}`, NEWSLETTER_PARSE_FORMAT_1, { zone })
   } catch {
-    return DateTime.fromFormat(`${date} ${time}`, NEWSLETTER_PARSE_FORMAT_2, { zone })
+    try {
+      return DateTime.fromFormat(`${date} ${time}`, NEWSLETTER_PARSE_FORMAT_2, { zone })
+    } catch {
+      console.warn(
+        chalk.yellow(
+          ` warn: found an wrongly formatted date \`${date} ${time}\` on the ACM Newsletter sheet, attempting JS Date parse...`,
+        ),
+      )
+      return DateTime.fromJSDate(new Date(`${date} ${time}`), { zone })
+    }
   }
 }
 
