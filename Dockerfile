@@ -24,3 +24,4 @@ ENTRYPOINT [ "/cyanea/entrypoint.sh" ]
 LABEL org.opencontainers.image.source https://github.com/pbrucla/cyanea
 LABEL org.opencontainers.image.description "ACM Cyber's modular script for syncing unified event information across disparate platforms!"
 LABEL org.opencontainers.image.licenses MIT
+LABEL org.opencontainers.image.version "v1.4"
