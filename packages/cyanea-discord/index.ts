@@ -20,7 +20,9 @@ const DISCORD_API_REASON = "Syncing events via the Cyanea Discord Bot"
 
 const stegcloak = new StegCloak(false, false)
 const zwc = (StegCloak as typeof StegCloak & { get zwc(): string[] }).zwc
-const zwcRegex = new RegExp(`[${zwc.join("")}]`, "g")
+const zwcRegex = new RegExp(`[${zwc.join("")}]`)
+const zwcPlusRegex = new RegExp(`[${zwc.join("")}]{2,}`, "g")
+const zwcYeetRegex = new RegExp(`(?<=[^${zwc.join("")}])\u200d(?=[^${zwc.join("")}])`, "g")
 
 // TODO document credentials:
 //
@@ -208,7 +210,7 @@ export default {
             // reveal and parse the stegcloak'd payload, if any
             let cyaneaMetadata: string
             try {
-              cyaneaMetadata = stegcloak.reveal(discordEvent.description, "")
+              cyaneaMetadata = stegcloak.reveal(discordEvent.description.replaceAll(zwcYeetRegex, ""), "")
             } catch (e) {
               if (
                 e instanceof Error &&
@@ -246,7 +248,7 @@ export default {
               id: parsedMetadata.i,
               title: discordEvent.name ?? "",
               type: undefined,
-              description: discordEvent.description.replaceAll(zwcRegex, ""),
+              description: discordEvent.description.replaceAll(zwcPlusRegex, ""),
               location: discordEvent.entity_metadata?.location ?? "",
               banner: FORCE_RESYNC_IMAGES ? null : parsedMetadata.b ?? null,
               start,
