@@ -153,24 +153,18 @@ export default {
 
             // handle stegcloak implementation details
             if (e.description.split(" ").length < 2) {
+              throw `cannot sync event ${e.id} to Discord - description must have at least 2 words due to stegcloak implementation details`
+            }
+            if (zwcRegex.test(e.description)) {
               console.warn(
                 chalk.yellow(
-                  ` warn: refusing to sync event ${e.id} to Discord - description must have at least 2 words due to stegcloak implementation details`,
-                ),
-              )
-              return []
-            } else if (zwcRegex.test(e.description)) {
-              console.warn(
-                chalk.yellow(
-                  ` warn: refusing to sync event ${
-                    e.id
-                  } to Discord - description must not have any zero-width characters ${JSON.stringify(
+                  ` warn: event ${e.id}'s description has zero-width characters ${JSON.stringify(
                     zwc,
-                  )} due to stegcloak implementation details`,
+                  )} - this may cause stegcloak to die later`,
                 ),
               )
-              return []
-            } else if (stegcloakEventDescription(e.id, e.banner, e.description).length > 1000) {
+            }
+            if (stegcloakEventDescription(e.id, e.banner, e.description).length > 1000) {
               if (stegcloakEventDescription(e.id, undefined, e.description).length > 1000) {
                 throw `cannot sync event ${e.id} to Discord - stegcloak'd event id + description is longer than 1000 characters`
               }
