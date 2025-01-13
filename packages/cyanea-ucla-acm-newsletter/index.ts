@@ -394,16 +394,17 @@ export default {
                   }
                 } else if (added.length > removed.length) {
                   // add the rest of the events at the bottom
-                  let nextEmptyRow =
-                    existingSheetRows[week - 1]
-                      .values!.slice(CYANEA_FIRST_SAFE_ROW)
-                      .findIndex(r =>
-                        r
-                          .slice(0, CYANEA_LAST_SAFE_COLUMN + 1)
-                          .every(x => x === null || x === undefined || (typeof x === "string" && x.trim().length == 0)),
-                      ) + 1
-                  if (nextEmptyRow === 0) {
+                  let nextEmptyRow = existingSheetRows[week - 1]
+                    .values!.slice(CYANEA_FIRST_SAFE_ROW)
+                    .findIndex(r =>
+                      r
+                        .slice(0, CYANEA_LAST_SAFE_COLUMN + 1)
+                        .every(x => x === null || x === undefined || (typeof x === "string" && x.trim().length == 0)),
+                    )
+                  if (nextEmptyRow === -1) {
                     nextEmptyRow = existingSheetRows[week - 1].values!.length + 1
+                  } else {
+                    nextEmptyRow += CYANEA_FIRST_SAFE_ROW + 1
                   }
                   for (const addedEvent of added.slice(removed.length)) {
                     const start = DateTime.fromMillis(addedEvent.start, { zone: timezone })
