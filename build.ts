@@ -109,7 +109,7 @@ console.log(chalk.blueBright("Exporting licenses..."))
 
 await fs.writeFile(
   "dist/LICENSE-3RD-PARTY.txt",
-  (await util.promisify(child_process.exec)("yarn licenses generate-disclaimer --recursive --production")).stdout,
+  (await util.promisify(child_process.exec)("pnpm pnpm-licenses generate-disclaimer --prod")).stdout,
 )
 
 console.log(chalk.blueBright("Build succeeded!"))

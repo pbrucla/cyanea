@@ -6,17 +6,14 @@
   "license": "MIT",
   "description": "ACM Cyber's modular script for syncing unified event information across disparate platforms!",
   "type": "module",
-  "workspaces": [
-    "packages/*",
-    "run/"
-  ],
   "scripts": {
-    "build": "yarn node --loader ts-node/esm --loader ./.pnp.loader.mjs build.ts",
-    "fix": "yarn prettier -w build.ts packages/**/*.ts && yarn eslint --fix build.ts packages/**/*.ts",
+    "build": "tsx build.ts",
+    "fix": "pnpm prettier -w build.ts packages/**/*.ts && pnpm eslint --fix build.ts packages/**/*.ts",
     "postinstall": "husky install"
   },
   "dependencies": {
     "@pbrucla/cyanea-cli": "workspace:^",
+    "@pbrucla/cyanea-core": "workspace:^",
     "@pbrucla/cyanea-discord": "workspace:^",
     "@pbrucla/cyanea-fs": "workspace:^",
     "@pbrucla/cyanea-gcal": "workspace:^",
@@ -24,6 +21,7 @@
     "@pbrucla/cyanea-ucla-acm-newsletter": "workspace:^"
   },
   "devDependencies": {
+    "@quantco/pnpm-licenses": "^2.2.1",
     "@stylistic/eslint-plugin": "^1.5.1",
     "@types/node": "^20.10.5",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
@@ -37,11 +35,10 @@
     "eslint-plugin-unused-imports": "^3.0.0",
     "husky": "^8.0.0",
     "prettier": "^3.1.1",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "5.3.1-rc"
   },
   "engines": {
     "node": ">=21.0.0"
-  },
-  "packageManager": "yarn@4.0.2"
+  }
 }
