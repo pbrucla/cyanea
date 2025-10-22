@@ -45,6 +45,7 @@ interface ACMNewsletterConfig {
     | "board"
     | "teachla"
     | "ai"
+    | "cloud"
     | "cyber"
     | "design"
     | "hack"
@@ -85,6 +86,8 @@ function prettifyCommittee(committee: ACMNewsletterConfig["committee"]): string 
       return "TeachLA"
     case "ai":
       return "AI"
+    case "cloud":
+      return "Cloud"
     case "cyber":
       return "Cyber"
     case "design":
@@ -122,6 +125,7 @@ export default {
             "board",
             "teachla",
             "ai",
+            "cloud",
             "cyber",
             "design",
             "hack",
