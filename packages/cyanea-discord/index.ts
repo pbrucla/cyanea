@@ -2,6 +2,7 @@ import { REST } from "@discordjs/rest"
 import { CyaneaPlugin } from "@pbrucla/cyanea-core"
 import { getEnvCredentials } from "@pbrucla/cyanea-core/util/index.ts"
 import CyaneaEvent, { diff } from "@pbrucla/cyanea-core/event/index.ts"
+import { TAG_BLOCK_REGEX, TAGHIDABLE_REGEX, taghide, untaghide } from "@pbrucla/cyanea-discord/taghide.ts"
 import chalk from "chalk"
 import {
   Routes,
@@ -13,16 +14,9 @@ import {
   GuildScheduledEventStatus,
 } from "discord-api-types/v10"
 import ffmpeg from "fluent-ffmpeg"
-import StegCloak from "stegcloak"
 import { Writable } from "node:stream"
 
 const DISCORD_API_REASON = "Syncing events via the Cyanea Discord Bot"
-
-const stegcloak = new StegCloak(false, false)
-const zwc = (StegCloak as typeof StegCloak & { get zwc(): string[] }).zwc
-const zwcRegex = new RegExp(`[${zwc.join("")}]`)
-const zwcPlusRegex = new RegExp(`[${zwc.join("")}]{2,}`, "g")
-const zwcYeetRegex = new RegExp(`(?<=[^${zwc.join("")}])\u200d(?=[^${zwc.join("")}])`, "g")
 
 // TODO document credentials:
 //
@@ -33,20 +27,23 @@ const zwcYeetRegex = new RegExp(`(?<=[^${zwc.join("")}])\u200d(?=[^${zwc.join(""
 // env variable to force an image resync
 const FORCE_RESYNC_IMAGES = process.env.CYANEA_DISCORD_FORCE_RESYNC_IMAGES === "true"
 
+const CAN_TAGHIDE_REGEX = RegExp(`^${TAGHIDABLE_REGEX.source}*$`, "u")
+const TAGHIDDEN_METADATA_REGEX = RegExp(`${TAG_BLOCK_REGEX.source}+$`, "u")
+
 interface DiscordConfig {
   guildId: string
 }
 
-interface StegcloakdCyaneaMetadata {
+interface HiddenCyaneaMetadata {
   // event id
   i: string
   // event banner url
   b?: string | undefined
 }
 
-function stegcloakEventDescription(id: string, banner: string | null | undefined, description: string): string {
-  const metadata: StegcloakdCyaneaMetadata = { i: id, ...(banner ? { b: banner } : {}) }
-  return stegcloak.hide(JSON.stringify(metadata), "", description)
+function hideEventDescription(id: string, banner: string | null | undefined, description: string): string {
+  const metadata: HiddenCyaneaMetadata = { i: id, ...(banner ? { b: banner } : {}) }
+  return description + taghide(JSON.stringify(metadata))
 }
 
 async function toDiscordEvent(event: CyaneaEvent): Promise<RESTPostAPIGuildScheduledEventJSONBody> {
@@ -93,13 +90,19 @@ async function toDiscordEvent(event: CyaneaEvent): Promise<RESTPostAPIGuildSched
   }
 
   // build the discord event!
-  // if the banner image can't fit in the metadata just drop it lol
-  let description = stegcloakEventDescription(event.id, event.banner, event.description)
-  if (description.length > 1000) {
-    description = stegcloakEventDescription(event.id, undefined, event.description)
+  let description
+  // if there's non-taghidable characters in the banner, drop it
+  if (event.banner && !CAN_TAGHIDE_REGEX.test(event.banner)) {
+    description = hideEventDescription(event.id, undefined, event.description)
+  } else {
+    description = hideEventDescription(event.id, event.banner, event.description)
+    // if the banner image can't fit in the metadata, also drop it
     if (description.length > 1000) {
-      throw `event ${event.id}'s stegcloak'd event id + description is longer than 1000 characters (this should have been thrown as an earlier exception !??)`
+      description = hideEventDescription(event.id, undefined, event.description)
     }
+  }
+  if (description.length > 1000) {
+    throw `event ${event.id}'s hidden event id + description is longer than 1000 characters (this should have been thrown as an earlier exception !??)`
   }
   return {
     entity_type: GuildScheduledEventEntityType.External,
@@ -153,26 +156,22 @@ export default {
               return []
             }
 
-            // handle stegcloak implementation details
-            if (e.description.split(" ").length < 2) {
-              throw `cannot sync event ${e.id} to Discord - description must have at least 2 words due to stegcloak implementation details`
+            if (!CAN_TAGHIDE_REGEX.test(e.id)) {
+              throw `cannot sync event ${e.id} to Discord - event id must only consist of printable ASCII characters`
             }
-            if (zwcRegex.test(e.description)) {
-              console.warn(
-                chalk.yellow(
-                  ` warn: event ${e.id}'s description has zero-width characters ${JSON.stringify(
-                    zwc,
-                  )} - this may cause stegcloak to die later`,
-                ),
-              )
-            }
-            if (stegcloakEventDescription(e.id, e.banner, e.description).length > 1000) {
-              if (stegcloakEventDescription(e.id, undefined, e.description).length > 1000) {
-                throw `cannot sync event ${e.id} to Discord - stegcloak'd event id + description is longer than 1000 characters`
+
+            const hasNonASCIIBanner = e.banner && !CAN_TAGHIDE_REGEX.test(e.banner)
+            if (hasNonASCIIBanner || hideEventDescription(e.id, e.banner, e.description).length > 1000) {
+              if (hideEventDescription(e.id, undefined, e.description).length > 1000) {
+                throw `cannot sync event ${e.id} to Discord - hidden event id + description is longer than 1000 characters`
               }
               console.warn(
                 chalk.yellow(
-                  ` warn: event ${e.id}'s stegcloak'd metadata is longer than 1000 characters - banner metadata will not be written to Discord!
+                  ` warn: event ${e.id}'s ${
+                    hasNonASCIIBanner
+                      ? "has a banner URL with non-printable ASCII characters"
+                      : "hidden metadata is longer than 1000 characters"
+                  } - banner metadata will not be written to Discord!
        (this will cause cyanea-discord to always re-sync this event in the future)`,
                 ),
               )
@@ -185,7 +184,7 @@ export default {
             e.meta = undefined
 
             // force banners to be null if undefined
-            // for diffing with StegcloakdCyaneaMetadata
+            // for diffing with HiddenCyaneaMetadata
             e.banner ??= null
 
             return [e]
@@ -207,37 +206,31 @@ export default {
               continue
             }
 
-            // reveal and parse the stegcloak'd payload, if any
+            // reveal and parse the hidden metadata payload, if any
+            const cyaneaMetadataIndex = discordEvent.description.search(TAGHIDDEN_METADATA_REGEX)
+            if (cyaneaMetadataIndex == -1) continue
             let cyaneaMetadata: string
             try {
-              cyaneaMetadata = stegcloak.reveal(discordEvent.description.replaceAll(zwcYeetRegex, ""), "")
+              cyaneaMetadata = untaghide(discordEvent.description.substring(cyaneaMetadataIndex))
             } catch (e) {
-              if (
-                e instanceof Error &&
-                e.message ===
-                  "Invisible stream not detected! Please copy and paste the StegCloak text sent by the sender."
-              ) {
-                continue
-              } else {
-                console.warn(
-                  chalk.yellow(` warn: failed to reveal stegcloak'd Cyanea metadata in event ${discordEvent.id}: ${e}`),
-                )
-                continue
-              }
+              console.warn(
+                chalk.yellow(` warn: failed to reveal hidden Cyanea metadata in event ${discordEvent.id}: ${e}`),
+              )
+              continue
             }
-            let parsedMetadata: StegcloakdCyaneaMetadata
+            let parsedMetadata: HiddenCyaneaMetadata
             try {
               parsedMetadata = JSON.parse(cyaneaMetadata)
               if (!("i" in parsedMetadata)) throw "no i field found"
             } catch (e) {
               console.warn(
-                chalk.yellow(` warn: failed to parse stegcloak'd Cyanea metadata in event ${discordEvent.id}: ${e}`),
+                chalk.yellow(` warn: failed to parse hidden Cyanea metadata in event ${discordEvent.id}: ${e}`),
               )
               continue
             }
 
             if (cyaneaID2DiscordID.has(parsedMetadata.i)) {
-              throw `Discord returned an event with duplicate stegcloaked id ${parsedMetadata.i}`
+              throw `Discord returned an event with duplicate hidden id ${parsedMetadata.i}`
             }
             cyaneaID2DiscordID.set(parsedMetadata.i, discordEvent.id)
 
@@ -248,7 +241,7 @@ export default {
               id: parsedMetadata.i,
               title: discordEvent.name ?? "",
               type: undefined,
-              description: discordEvent.description.replaceAll(zwcPlusRegex, ""),
+              description: discordEvent.description.substring(0, cyaneaMetadataIndex),
               location: discordEvent.entity_metadata?.location ?? "",
               banner: FORCE_RESYNC_IMAGES ? null : parsedMetadata.b ?? null,
               start,

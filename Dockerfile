@@ -21,7 +21,7 @@ COPY action/entrypoint.sh /cyanea/entrypoint.sh
 ENTRYPOINT [ "/cyanea/entrypoint.sh" ]
 
 # branding (tm)
-LABEL org.opencontainers.image.source https://github.com/pbrucla/cyanea
-LABEL org.opencontainers.image.description "ACM Cyber's modular script for syncing unified event information across disparate platforms!"
-LABEL org.opencontainers.image.licenses MIT
-LABEL org.opencontainers.image.version "v1.4.3"
+LABEL org.opencontainers.image.source="https://github.com/pbrucla/cyanea"
+LABEL org.opencontainers.image.description="ACM Cyber's modular script for syncing unified event information across disparate platforms!"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.version="v1.5.0"
