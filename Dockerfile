@@ -2,19 +2,19 @@ FROM node:21.4-alpine3.18
 
 # add ffmpeg for cyanea-discord
 RUN apk add --no-cache ffmpeg
+RUN corepack enable pnpm
 
 # build cyanea
-RUN mkdir -p /cyanea/build && mkdir /cyanea/build/packages && mkdir /cyanea/build/.yarn
-COPY .yarn/plugins /cyanea/build/.yarn/plugins/
-COPY .yarnrc.yml build.ts package.json tsconfig.json yarn.lock /cyanea/build/
+RUN mkdir -p /cyanea/build && mkdir /cyanea/build/packages
+COPY build.ts package.json tsconfig.json pnpm-lock.yaml pnpm-workspace.yaml /cyanea/build/
 COPY packages /cyanea/build/packages/
 RUN cd /cyanea/build && \
-  yarn set version 4.0.2 && \
-  yarn install && \
-  yarn build && \
+  pnpm install --frozen-lockfile && \
+  pnpm build && \
   cd .. && \
   mv build/dist/* ./ && \
-  rm -rf build
+  rm -rf build && \
+  pnpm store prune
 
 # add entrypoint
 COPY action/entrypoint.sh /cyanea/entrypoint.sh
