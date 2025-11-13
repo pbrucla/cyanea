@@ -102,6 +102,7 @@ export default {
           // grab existing events in the calendar
           const existingEvents: CyaneaEvent[] = []
           const cyaneaID2GCalID = new Map<string, string>()
+          const cyaneaID2GCalEvent = new Map<string, calendar_v3.Schema$Event>()
           let nextPageToken: string | undefined = undefined
           do {
             const res: calendar_v3.Schema$Events = (
@@ -143,6 +144,7 @@ export default {
                 links: undefined,
                 meta: undefined,
               })
+              cyaneaID2GCalEvent.set(possiblyCyaneaId, gCalEvent)
             }
           } while (nextPageToken !== undefined)
 
@@ -179,7 +181,10 @@ export default {
               eventId: cyaneaID2GCalID.get(modifiedEvent.id)!,
               sendUpdates: "all",
               supportsAttachments: true,
-              requestBody: toGCalEvent(modifiedEvent, timezone),
+              requestBody: {
+                ...cyaneaID2GCalEvent.get(modifiedEvent.id)!,
+                ...toGCalEvent(modifiedEvent, timezone),
+              },
             })
           }
           for (const removedEvent of removed) {
